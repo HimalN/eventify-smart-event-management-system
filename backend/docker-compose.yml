@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: sems_mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: smart_events_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - sems_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: sems_fastapi_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpassword@db:3306/smart_events_db
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=smart_events_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=rootpassword
+      - JWT_SECRET_KEY=sems-dev-jwt-secret-key-change-in-production-2026
+      - JWT_ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - REFRESH_TOKEN_EXPIRE_DAYS=30
+      - OPENWEATHER_API_KEY=b0bad69d4c4a2d0a735d2b2633e8d37b
+      - WEATHER_DEFAULT_LAT=6.9271
+      - WEATHER_DEFAULT_LON=79.8612
+      - MODEL_PATH=app/ml/models
+      - CORS_ORIGINS=["http://localhost:3000","http://localhost:5173"]
+      - APP_ENV=development
+      - DEBUG=true
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  sems_db_data:
