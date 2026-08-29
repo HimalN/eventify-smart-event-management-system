@@ -1,0 +1,52 @@
+[
+    {
+        "id": "mod-lin",
+        "name": "Linear Regression",
+        "mae": 209.95,
+        "rmse": 332.0,
+        "r2Score": 0.7484,
+        "trainingTimeMs": 3,
+        "isBestModel": false,
+        "description": "Baseline multi-variable ordinary least squares regression model. Provides benchmark linear relationship between registrations and turnout."
+    },
+    {
+        "id": "mod-dec",
+        "name": "Decision Tree Regression",
+        "mae": 195.72,
+        "rmse": 363.44,
+        "r2Score": 0.6985,
+        "trainingTimeMs": 13,
+        "isBestModel": false,
+        "description": "Single hierarchical decision tree estimator. Highly interpretable decision splits but prone to higher variance on out-of-distribution weather spikes."
+    },
+    {
+        "id": "mod-ran",
+        "name": "Random Forest Regression",
+        "mae": 143.5,
+        "rmse": 256.26,
+        "r2Score": 0.8501,
+        "trainingTimeMs": 1454,
+        "isBestModel": false,
+        "description": "Ensemble of bagging decision trees. Highly robust against feature noise and registration velocity variations."
+    },
+    {
+        "id": "mod-gra",
+        "name": "Gradient Boosting Regression",
+        "mae": 127.35,
+        "rmse": 220.95,
+        "r2Score": 0.8886,
+        "trainingTimeMs": 1173,
+        "isBestModel": true,
+        "description": "Sequential additive boosting model. Strong resistance to overfitting across variable seasonal attendance trends."
+    },
+    {
+        "id": "mod-xgb",
+        "name": "XGBoost",
+        "mae": 124.16,
+        "rmse": 222.8,
+        "r2Score": 0.8867,
+        "trainingTimeMs": 271,
+        "isBestModel": false,
+        "description": "Extreme Gradient Boosting model with gradient-based regularization. Highest predictive capability on nonlinear weather-attendance interactions."
+    }
+]

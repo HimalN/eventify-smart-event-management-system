@@ -1,0 +1,40 @@
+# FastAPI & Server
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+python-multipart==0.0.20
+
+# Database
+sqlalchemy==2.0.41
+alembic==1.16.1
+pymysql==1.1.1
+cryptography==44.0.3
+
+# Pydantic
+pydantic==2.11.3
+pydantic-settings==2.9.1
+
+# Authentication
+python-jose[cryptography]==3.4.0
+bcrypt==4.3.0
+
+# Machine Learning
+pandas==2.2.3
+numpy==2.2.6
+scikit-learn==1.6.1
+xgboost==3.0.2
+joblib==1.5.1
+
+# HTTP Client (for OpenWeatherMap)
+httpx==0.28.1
+
+# Export (reports)
+openpyxl==3.1.5
+
+# Testing
+pytest==8.3.5
+pytest-asyncio==0.25.3
+httpx==0.28.1
+
+# Utilities
+python-dotenv==1.1.0
+email-validator==2.3.0
