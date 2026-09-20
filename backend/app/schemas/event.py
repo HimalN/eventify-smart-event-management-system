@@ -53,6 +53,7 @@ class EventResponse(CamelModel):
     planning_insights: List[PlanningInsightSchema] = []
 
 
+<<<<<<< HEAD
 class PaginatedEventsResponse(CamelModel):
     items: List[EventResponse]
     total: int
@@ -65,6 +66,9 @@ class PaginatedEventsResponse(CamelModel):
 
 class EventCreate(CamelModel):
 
+=======
+class EventCreate(CamelModel):
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
     title: str
     description: Optional[str] = ""
     location: Optional[str] = "Main Auditorium"

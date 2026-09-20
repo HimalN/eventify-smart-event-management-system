@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -20,12 +21,20 @@ import {
   Layers,
   GraduationCap,
 } from "lucide-react";
+=======
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { Download, FileBarChart, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 import { toast } from "sonner";
 import { AppShell } from "@/components/layouts/app-shell";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
+<<<<<<< HEAD
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -36,6 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+<<<<<<< HEAD
 import {
   Dialog,
   DialogContent,
@@ -44,11 +54,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/auth-context";
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 import { api, queryKeys } from "@/services/api";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({
     meta: [
+<<<<<<< HEAD
       { title: "Reports & Analytics — Eventify" },
       {
         name: "description",
@@ -60,6 +73,17 @@ export const Route = createFileRoute("/reports")({
         property: "og:description",
         content:
           "Generate, preview and export official attendance, registration, weather and ML prediction reports.",
+=======
+      { title: "Reports — Eventify" },
+      {
+        name: "description",
+        content: "Generate and export attendance, registration, weather and prediction reports.",
+      },
+      { property: "og:title", content: "Reports — Eventify" },
+      {
+        property: "og:description",
+        content: "Generate and export attendance, registration, weather and prediction reports.",
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -68,6 +92,7 @@ export const Route = createFileRoute("/reports")({
   component: ReportsPage,
 });
 
+<<<<<<< HEAD
 const REPORT_TYPES = [
   { id: "attendance", label: "Event Attendance & Turnout Report" },
   { id: "registration", label: "Participant Registration & QR Check-In Report" },
@@ -89,11 +114,23 @@ function ReportsPage() {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   // Queries
+=======
+const TYPES = [
+  "Attendance Report",
+  "Registration Report",
+  "Weather Report",
+  "Event Performance",
+  "Prediction Report",
+];
+
+function ReportsPage() {
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   const { data: reports = [], isLoading: reportsLoading } = useQuery({
     queryKey: queryKeys.reports,
     queryFn: api.getReports,
   });
 
+<<<<<<< HEAD
   const { data: events = [], isLoading: eventsLoading } = useQuery({
     queryKey: queryKeys.events,
     queryFn: api.getEvents,
@@ -104,11 +141,14 @@ function ReportsPage() {
     queryFn: api.getRegistrations,
   });
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   const { data: historicalEvents = [], isLoading: historicalLoading } = useQuery({
     queryKey: queryKeys.historical,
     queryFn: api.getHistoricalEvents,
   });
 
+<<<<<<< HEAD
   const { data: models = [] } = useQuery({
     queryKey: queryKeys.models,
     queryFn: api.getModelEvaluations,
@@ -245,6 +285,9 @@ function ReportsPage() {
   };
 
   if (reportsLoading || historicalLoading || eventsLoading || registrationsLoading) {
+=======
+  if (reportsLoading || historicalLoading) {
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
     return (
       <AppShell>
         <div className="flex justify-center p-12 text-muted-foreground">
@@ -254,6 +297,7 @@ function ReportsPage() {
     );
   }
 
+<<<<<<< HEAD
   const currentTypeLabel =
     REPORT_TYPES.find((t) => t.id === selectedType)?.label || "Attendance Report";
 
@@ -344,11 +388,34 @@ function ReportsPage() {
                 {REPORT_TYPES.map((t) => (
                   <SelectItem key={t.id} value={t.id} className="text-xs">
                     {t.label}
+=======
+  return (
+    <AppShell>
+      <PageHeader
+        title="Reports"
+        description="Build, preview and export operational reports."
+        crumbs={[{ label: "Reports" }]}
+      />
+
+      <SectionCard title="Generate a report" description="Choose a type and date range">
+        <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-2 md:col-span-2">
+            <Label htmlFor="report-type">Report type</Label>
+            <Select defaultValue="Attendance Report">
+              <SelectTrigger id="report-type" className="h-10 rounded-lg">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+<<<<<<< HEAD
 
           <div className="grid gap-2">
             <Label htmlFor="category" className="text-xs font-semibold">
@@ -726,6 +793,76 @@ function ReportsPage() {
                   <td className="px-5 py-3.5 font-semibold text-foreground">{h.title}</td>
                   <td className="px-5 py-3.5 text-xs text-muted-foreground">
                     <p className="font-medium text-foreground">{h.date}</p>
+=======
+          <div className="grid gap-2">
+            <Label htmlFor="from">From</Label>
+            <Input id="from" type="date" className="h-10 rounded-lg" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="to">To</Label>
+            <Input id="to" type="date" className="h-10 rounded-lg" />
+          </div>
+        </div>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button className="rounded-lg" onClick={() => toast.success("Report generated")}>
+            <FileBarChart className="size-4" aria-hidden="true" /> Generate
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-lg"
+            onClick={() => toast.success("Exporting PDF…")}
+          >
+            <FileText className="size-4" aria-hidden="true" /> Export PDF
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-lg"
+            onClick={() => toast.success("Exporting Excel…")}
+          >
+            <FileSpreadsheet className="size-4" aria-hidden="true" /> Export Excel
+          </Button>
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Historical Event Turnout & Prediction Records"
+        description="Archive of completed university events with ground-truth attendance and model accuracy metrics"
+        bodyClassName="p-0"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <th scope="col" className="px-5 py-3.5 font-medium">
+                  Event Name
+                </th>
+                <th scope="col" className="px-5 py-3.5 font-medium">
+                  Date & Category
+                </th>
+                <th scope="col" className="px-5 py-3.5 font-medium">
+                  Registrations
+                </th>
+                <th scope="col" className="px-5 py-3.5 font-medium">
+                  ML Predicted
+                </th>
+                <th scope="col" className="px-5 py-3.5 font-medium">
+                  Actual Turnout
+                </th>
+                <th scope="col" className="px-5 py-3.5 font-medium">
+                  Prediction Accuracy
+                </th>
+                <th scope="col" className="px-5 py-3.5 font-medium">
+                  Weather Condition
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {historicalEvents.map((h: any) => (
+                <tr key={h.id} className="transition-colors hover:bg-muted/50">
+                  <td className="px-5 py-3.5 font-medium text-foreground">{h.title}</td>
+                  <td className="px-5 py-3.5 text-xs text-muted-foreground">
+                    <p>{h.date}</p>
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
                     <p>{h.category}</p>
                   </td>
                   <td className="px-5 py-3.5 tabular-nums text-foreground">{h.registered}</td>
@@ -756,6 +893,7 @@ function ReportsPage() {
         </div>
       </SectionCard>
 
+<<<<<<< HEAD
       {/* Saved Reports Archive */}
       <SectionCard
         title="Compiled System Reports Repository"
@@ -942,6 +1080,58 @@ function ReportsPage() {
           </div>
         </DialogContent>
       </Dialog>
+=======
+      <SectionCard
+        title="Generated System Reports"
+        description="Previously compiled exports"
+        bodyClassName="p-0"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[680px] text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <th scope="col" className="px-5 py-3 font-medium">
+                  Report
+                </th>
+                <th scope="col" className="px-5 py-3 font-medium">
+                  Period
+                </th>
+                <th scope="col" className="px-5 py-3 font-medium">
+                  Records
+                </th>
+                <th scope="col" className="px-5 py-3 font-medium">
+                  Generated
+                </th>
+                <th scope="col" className="px-5 py-3 font-medium text-right">
+                  Download
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {reports.map((r: any) => (
+                <tr key={r.id} className="transition-colors hover:bg-muted/50">
+                  <td className="px-5 py-3 font-medium">{r.name}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{r.period}</td>
+                  <td className="px-5 py-3 tabular-nums">{r.records?.toLocaleString() || r.records}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{r.generated}</td>
+                  <td className="px-5 py-3 text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-lg"
+                      onClick={() => toast.success(`Downloading ${r.name}`)}
+                    >
+                      <Download className="size-4" aria-hidden="true" />
+                      <span className="sr-only">Download {r.name}</span>
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
     </AppShell>
   );
 }

@@ -19,5 +19,8 @@ class Registration(Base):
     registration_date = Column(Date, nullable=False)
     confirmation_status = Column(String(20), nullable=False, default="confirmed")  # confirmed | waitlisted | cancelled
     attendance_status = Column(String(20), nullable=False, default="pending")  # attended | absent | pending
+<<<<<<< HEAD
     checked_in_at = Column(DateTime, nullable=True)
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
     cancelled_at = Column(DateTime, nullable=True)

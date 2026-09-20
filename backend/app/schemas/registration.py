@@ -16,13 +16,17 @@ class RegistrationResponse(CamelModel):
     status: str = "confirmed"
     attendance: str = "pending"
     ticket_code: str
+<<<<<<< HEAD
     checked_in_at: Optional[str] = None
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 
 
 class RegistrationCreate(CamelModel):
     event_id: str
     participant_name: Optional[str] = None
     email: Optional[EmailStr] = None
+<<<<<<< HEAD
 
 
 class CheckInRequest(CamelModel):
@@ -37,3 +41,5 @@ class CheckInResponse(CamelModel):
     already_checked_in: bool = False
     timestamp: str
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad

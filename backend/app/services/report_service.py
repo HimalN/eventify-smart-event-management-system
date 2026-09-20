@@ -15,6 +15,7 @@ from app.models.weather import WeatherRecord
 def get_reports_list(db: Session) -> list[Report]:
     return db.query(Report).order_by(Report.generated_at.desc()).all()
 
+<<<<<<< HEAD
 def delete_report(db: Session, report_id: str) -> bool:
     rep = db.query(Report).filter(Report.id == report_id).first()
     if not rep:
@@ -23,11 +24,14 @@ def delete_report(db: Session, report_id: str) -> bool:
     db.commit()
     return True
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 def generate_report(db: Session, report_type: str, date_from: str | None, date_to: str | None, user_id: str | None) -> dict:
     """Query data, compile records, and return a summary metadata object."""
     from_date = datetime.strptime(date_from, "%Y-%m-%d").date() if date_from else date(2026, 1, 1)
     to_date = datetime.strptime(date_to, "%Y-%m-%d").date() if date_to else date(2026, 12, 31)
 
+<<<<<<< HEAD
     records_count = 0
     clean_type = report_type.strip()
 
@@ -38,10 +42,22 @@ def generate_report(db: Session, report_type: str, date_from: str | None, date_t
     elif "weather" in clean_type.lower():
         records_count = db.query(WeatherRecord).count()
     elif "prediction" in clean_type.lower():
+=======
+    # Simple count query depending on type
+    records_count = 0
+    if report_type == "Attendance Report":
+        records_count = db.query(Event).filter(Event.event_date.between(from_date, to_date), Event.status == "completed").count()
+    elif report_type == "Registration Report":
+        records_count = db.query(Registration).filter(Registration.registration_date.between(from_date, to_date)).count()
+    elif report_type == "Weather Report":
+        records_count = db.query(WeatherRecord).count()
+    elif report_type == "Prediction Report":
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
         records_count = db.query(Prediction).count()
     else:
         records_count = db.query(Event).filter(Event.event_date.between(from_date, to_date)).count()
 
+<<<<<<< HEAD
     report_name = f"{clean_type} - {from_date.strftime('%d %b %Y')} to {to_date.strftime('%d %b %Y')}"
     
     report = Report(
@@ -49,6 +65,15 @@ def generate_report(db: Session, report_type: str, date_from: str | None, date_t
         period=f"{from_date.strftime('%b %Y')} – {to_date.strftime('%b %Y')}",
         records_count=records_count,
         report_type=clean_type,
+=======
+    report_name = f"{report_type} - {from_date.strftime('%d %b')} to {to_date.strftime('%d %b')}"
+    
+    report = Report(
+        name=report_name,
+        period=f"{from_date.strftime('%B %Y')}",
+        records_count=records_count,
+        report_type=report_type,
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
         generated_at=datetime.now(timezone.utc),
         created_by=user_id,
     )
@@ -56,6 +81,10 @@ def generate_report(db: Session, report_type: str, date_from: str | None, date_t
     db.commit()
     db.refresh(report)
 
+<<<<<<< HEAD
+=======
+    # Return standard response
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
     return {
         "id": report.id,
         "name": report.name,
@@ -68,6 +97,7 @@ def export_report_csv(db: Session, report_type: str) -> str:
     """Generate in-memory CSV file contents for download."""
     output = io.StringIO()
     writer = csv.writer(output)
+<<<<<<< HEAD
     clean_type = report_type.lower().strip()
 
     if "attendance" in clean_type:
@@ -160,5 +190,29 @@ def export_report_csv(db: Session, report_type: str) -> str:
                 e.actual_attendance if e.actual_attendance is not None else "Pending",
                 e.status
             ])
+=======
+
+    if report_type == "Attendance Report":
+        writer.writerow(["Event ID", "Title", "Category", "Date", "Capacity", "Expected Attendance", "Predicted", "Actual", "Accuracy (%)"])
+        events = db.query(Event).filter(Event.status == "completed").all()
+        for e in events:
+            accuracy = 0
+            if e.actual_attendance and e.predicted_attendance:
+                accuracy = (1 - abs(e.predicted_attendance - e.actual_attendance) / max(e.actual_attendance, 1)) * 100
+            writer.writerow([e.id, e.title, e.category, e.event_date, e.capacity, e.expected_attendance, e.predicted_attendance, e.actual_attendance, round(accuracy, 1)])
+            
+    elif report_type == "Registration Report":
+        writer.writerow(["Registration ID", "Event ID", "Participant Name", "Email", "Registered At", "Ticket Code", "Status"])
+        regs = db.query(Registration).all()
+        for r in regs:
+            writer.writerow([r.id, r.event_id, r.participant_name, r.participant_email, r.registration_date, r.ticket_code, r.confirmation_status])
+            
+    else:
+        # Default event summary
+        writer.writerow(["Event ID", "Title", "Category", "Date", "Venue Type", "Registrations", "Predicted", "Status"])
+        events = db.query(Event).all()
+        for e in events:
+            writer.writerow([e.id, e.title, e.category, e.event_date, e.venue_type, e.current_registrations, e.predicted_attendance, e.status])
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 
     return output.getvalue()

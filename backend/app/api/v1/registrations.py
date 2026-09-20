@@ -10,13 +10,20 @@ from app.core.dependencies import get_db, get_current_user
 from app.models.user import User
 from app.models.registration import Registration
 from app.models.event import Event
+<<<<<<< HEAD
 from app.schemas.registration import RegistrationResponse, RegistrationCreate, CheckInRequest, CheckInResponse
+=======
+from app.schemas.registration import RegistrationResponse, RegistrationCreate
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 from app.services import registration_service
 
 router = APIRouter(prefix="/registrations", tags=["Registrations"])
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 @router.get("", response_model=List[RegistrationResponse])
 def get_registrations(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Non-admin / non-organizer can only see their own registrations
@@ -40,7 +47,10 @@ def get_registrations(db: Session = Depends(get_db), current_user: User = Depend
             status=r.confirmation_status,
             attendance=r.attendance_status,
             ticket_code=r.ticket_code,
+<<<<<<< HEAD
             checked_in_at=r.checked_in_at.strftime("%Y-%m-%d %H:%M:%S") if r.checked_in_at else None,
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
         ))
     return response_list
 
@@ -77,7 +87,10 @@ async def register(request: RegistrationCreate, db: Session = Depends(get_db), c
             status=reg.confirmation_status,
             attendance=reg.attendance_status,
             ticket_code=reg.ticket_code,
+<<<<<<< HEAD
             checked_in_at=reg.checked_in_at.strftime("%Y-%m-%d %H:%M:%S") if reg.checked_in_at else None,
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
@@ -97,6 +110,7 @@ async def cancel_registration(id: str, db: Session = Depends(get_db), current_us
     if not success:
         raise HTTPException(status_code=404, detail="Registration not found")
     return {"success": True, "message": "Registration cancelled successfully"}
+<<<<<<< HEAD
 
 
 @router.post("/check-in", response_model=CheckInResponse)
@@ -140,3 +154,5 @@ async def check_in(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad

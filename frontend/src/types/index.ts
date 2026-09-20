@@ -123,6 +123,7 @@ export interface EventItem {
   planningInsights: PlanningInsight[];
 }
 
+<<<<<<< HEAD
 export interface PaginatedEvents {
   items: EventItem[];
   total: number;
@@ -145,6 +146,9 @@ export interface EventQueryParams {
 
 export interface Registration {
 
+=======
+export interface Registration {
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   id: string;
   eventId: string;
   eventTitle: string;
@@ -154,6 +158,7 @@ export interface Registration {
   status: "confirmed" | "waitlisted" | "cancelled";
   attendance: "attended" | "absent" | "pending";
   ticketCode: string;
+<<<<<<< HEAD
   checkedInAt?: string;
 }
 
@@ -166,6 +171,10 @@ export interface CheckInResponse {
 }
 
 
+=======
+}
+
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 export interface NotificationItem {
   id: string;
   type: "reminder" | "registration" | "weather" | "prediction" | "system";

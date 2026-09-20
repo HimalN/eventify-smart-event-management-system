@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -10,15 +11,26 @@ import {
   Loader2,
   ArrowUpDown,
 } from "lucide-react";
+=======
+import { useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { CalendarPlus, LayoutGrid, List, Search, SlidersHorizontal, Loader2 } from "lucide-react";
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 import { AppShell } from "@/components/layouts/app-shell";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
+<<<<<<< HEAD
 import { PaginationControls } from "@/components/shared/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+=======
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 import {
   Select,
   SelectContent,
@@ -52,6 +64,7 @@ export const Route = createFileRoute("/events/")({
 });
 
 function EventsPage() {
+<<<<<<< HEAD
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [category, setCategory] = useState("all");
@@ -138,6 +151,26 @@ function EventsPage() {
     }
     return pages;
   };
+=======
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const [category, setCategory] = useState("all");
+  const [view, setView] = useState<"grid" | "table">("grid");
+
+  const { data: events = [], isLoading } = useQuery({
+    queryKey: queryKeys.events,
+    queryFn: api.getEvents,
+  });
+
+  const categories = useMemo(() => [...new Set(events.map((e) => e.category))], [events]);
+  const filtered = events.filter(
+    (e) =>
+      (status === "all" || e.status === status) &&
+      (category === "all" || e.category === category) &&
+      (e.title.toLowerCase().includes(query.toLowerCase()) ||
+        e.location.toLowerCase().includes(query.toLowerCase())),
+  );
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 
   return (
     <AppShell>
@@ -154,6 +187,7 @@ function EventsPage() {
         }
       />
 
+<<<<<<< HEAD
       {/* Filter and Search Bar */}
       <SectionCard
         title="Filters & Search"
@@ -165,12 +199,17 @@ function EventsPage() {
       >
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_auto_auto_auto_auto_auto]">
           {/* Search Input */}
+=======
+      <SectionCard title="Filters" description={`${filtered.length} of ${events.length} events`}>
+        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
           <div className="relative">
             <Search
               className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
             />
             <Input
+<<<<<<< HEAD
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search title, venue or description..."
@@ -188,11 +227,29 @@ function EventsPage() {
             <SelectContent>
               {["all", "draft", "upcoming", "ongoing", "completed", "cancelled"].map((s) => (
                 <SelectItem key={s} value={s} className="capitalize text-xs">
+=======
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search events or venues"
+              className="h-10 rounded-lg pl-9"
+              aria-label="Search events"
+            />
+          </div>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="h-10 rounded-lg md:w-40" aria-label="Filter by status">
+              <SlidersHorizontal className="size-4" aria-hidden="true" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {["all", "draft", "upcoming", "ongoing", "completed", "cancelled"].map((s) => (
+                <SelectItem key={s} value={s} className="capitalize">
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
                   {s === "all" ? "All statuses" : s}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+<<<<<<< HEAD
 
           {/* Category Filter */}
           <Select value={category} onValueChange={handleCategoryChange}>
@@ -203,11 +260,22 @@ function EventsPage() {
               <SelectItem value="all" className="text-xs">All categories</SelectItem>
               {categories.map((c) => (
                 <SelectItem key={c} value={c} className="text-xs">
+=======
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="h-10 rounded-lg md:w-44" aria-label="Filter by category">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All categories</SelectItem>
+              {categories.map((c) => (
+                <SelectItem key={c} value={c}>
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
                   {c}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+<<<<<<< HEAD
 
           {/* Sort By */}
           <Select
@@ -241,11 +309,17 @@ function EventsPage() {
           </Select>
 
           {/* View Mode Toggle */}
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
           <div className="flex items-center gap-1 rounded-lg border border-border p-1">
             <Button
               variant={view === "grid" ? "secondary" : "ghost"}
               size="sm"
+<<<<<<< HEAD
               className="rounded-md h-8 w-8 p-0"
+=======
+              className="rounded-md"
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
               onClick={() => setView("grid")}
               aria-label="Grid view"
             >
@@ -254,7 +328,11 @@ function EventsPage() {
             <Button
               variant={view === "table" ? "secondary" : "ghost"}
               size="sm"
+<<<<<<< HEAD
               className="rounded-md h-8 w-8 p-0"
+=======
+              className="rounded-md"
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
               onClick={() => setView("table")}
               aria-label="Table view"
             >
@@ -264,12 +342,20 @@ function EventsPage() {
         </div>
       </SectionCard>
 
+<<<<<<< HEAD
       {/* Main Content Area */}
       {isLoading ? (
         <div className="flex justify-center p-16 text-muted-foreground">
           <Loader2 className="size-8 animate-spin" />
         </div>
       ) : events.length === 0 ? (
+=======
+      {isLoading ? (
+        <div className="flex justify-center p-12 text-muted-foreground">
+          <Loader2 className="size-8 animate-spin" />
+        </div>
+      ) : filtered.length === 0 ? (
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
         <EmptyState
           icon={Search}
           title="No events found"
@@ -277,12 +363,20 @@ function EventsPage() {
           action={
             <Button
               variant="outline"
+<<<<<<< HEAD
               className="rounded-lg text-xs"
               onClick={() => {
                 setSearch("");
                 setStatus("all");
                 setCategory("all");
                 setPage(1);
+=======
+              className="rounded-lg"
+              onClick={() => {
+                setQuery("");
+                setStatus("all");
+                setCategory("all");
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
               }}
             >
               Clear filters
@@ -290,6 +384,7 @@ function EventsPage() {
           }
         />
       ) : view === "grid" ? (
+<<<<<<< HEAD
         <div className="relative">
           {isFetching && !isLoading && (
             <div className="absolute top-2 right-2 z-10 rounded-full bg-background/80 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm backdrop-blur-xs flex items-center gap-1.5 border border-border">
@@ -356,6 +451,60 @@ function EventsPage() {
               );
             })}
           </div>
+=======
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((e) => {
+            const Icon = weatherIcon[e.weather?.condition || "Sunny"] || weatherIcon["Sunny"];
+            return (
+              <Link
+                key={e.id}
+                to="/events/$eventId"
+                params={{ eventId: e.id }}
+                className="surface-card group overflow-hidden transition-shadow hover:shadow-[var(--shadow-lift)]"
+              >
+                <div
+                  className="h-24 w-full"
+                  style={{
+                    backgroundImage: `linear-gradient(135deg, oklch(0.62 0.16 ${e.bannerHue || 200}), oklch(0.52 0.18 ${((e.bannerHue || 200) + 40) % 360}))`,
+                  }}
+                  aria-hidden="true"
+                />
+                <div className="p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="truncate text-sm font-semibold group-hover:text-primary">
+                      {e.title}
+                    </p>
+                    <StatusBadge status={e.status} />
+                  </div>
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                    {e.category} · {e.location}
+                  </p>
+                  <dl className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <dt className="text-muted-foreground">Date</dt>
+                      <dd className="font-medium">{e.date}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">Registered</dt>
+                      <dd className="font-medium tabular-nums">
+                        {e.currentRegistrations}/{e.capacity}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">Predicted</dt>
+                      <dd className="font-medium tabular-nums">{e.predictedAttendance}</dd>
+                    </div>
+                  </dl>
+                  <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    {Icon && <Icon className="size-3.5" aria-hidden="true" />}
+                    {e.weather?.condition || "Sunny"} · {e.weather?.temperature || 28}°C · {e.weather?.rainProbability || 0}%
+                    rain
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
         </div>
       ) : (
         <SectionCard title="Events" description="Tabular view" bodyClassName="p-0">
@@ -387,7 +536,11 @@ function EventsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
+<<<<<<< HEAD
                 {events.map((e) => (
+=======
+                {filtered.map((e) => (
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
                   <tr key={e.id} className="transition-colors hover:bg-muted/50">
                     <td className="px-5 py-3">
                       <Link
@@ -431,6 +584,7 @@ function EventsPage() {
           </div>
         </SectionCard>
       )}
+<<<<<<< HEAD
 
       {/* Pagination Controls Footer */}
       <PaginationControls
@@ -448,3 +602,8 @@ function EventsPage() {
 }
 
 
+=======
+    </AppShell>
+  );
+}
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad

@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+<<<<<<< HEAD
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+=======
+import { useQuery } from "@tanstack/react-query";
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 import {
   AlertTriangle,
   CalendarDays,
@@ -18,9 +22,12 @@ import {
   Utensils,
   Wind,
   Loader2,
+<<<<<<< HEAD
   UserCheck,
   QrCode,
   Check,
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layouts/app-shell";
@@ -32,17 +39,25 @@ import { weatherIcon } from "@/components/shared/weather-widget";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+<<<<<<< HEAD
 import { CheckinTerminalModal } from "@/components/events/checkin-terminal-modal";
 import { QrTicketModal } from "@/components/shared/qr-ticket-modal";
 import { useAuth } from "@/contexts/auth-context";
 import { api, queryKeys } from "@/services/api";
 import type { Registration } from "@/types";
+=======
+import { useAuth } from "@/contexts/auth-context";
+import { api, queryKeys } from "@/services/api";
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 
 export const Route = createFileRoute("/events/$eventId")({
   component: EventDetailPage,
 });
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 function EventDetailPage() {
   const { eventId } = Route.useParams();
   const { user } = useAuth();
@@ -52,6 +67,7 @@ function EventDetailPage() {
     queryFn: () => api.getEvent(eventId),
   });
 
+<<<<<<< HEAD
   const queryClient = useQueryClient();
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
@@ -59,12 +75,15 @@ function EventDetailPage() {
   const [checkingInCode, setCheckingInCode] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   const { data: allRegistrations = [] } = useQuery({
     queryKey: queryKeys.registrations,
     queryFn: api.getRegistrations,
   });
   
   const attendees = allRegistrations.filter((r) => r.eventId === eventId);
+<<<<<<< HEAD
   
   // Identify if current logged-in user is already registered for this event
   const myRegistration = attendees.find((r) => {
@@ -102,6 +121,9 @@ function EventDetailPage() {
       setCheckingInCode(null);
     }
   };
+=======
+  const [isRegistered, setIsRegistered] = useState(false);
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 
   if (isLoading) {
     return (
@@ -134,6 +156,7 @@ function EventDetailPage() {
   const WeatherConditionIcon = weatherIcon[event.weather?.condition || "Sunny"] || weatherIcon["Sunny"];
 
   const handleRegister = async () => {
+<<<<<<< HEAD
     if (!user?.name || !user?.email) {
       toast.error("Please login to register for events.");
       return;
@@ -156,6 +179,20 @@ function EventDetailPage() {
       });
     } finally {
       setIsRegistering(false);
+=======
+    try {
+      if (user?.name && user?.email) {
+        await api.registerForEvent(event.id, user.name, user.email);
+        setIsRegistered(true);
+        toast.success("Registration Confirmed!", {
+          description: `You are registered for ${event.title}.`,
+        });
+      } else {
+        toast.error("Please login to register.");
+      }
+    } catch {
+      toast.error("Registration failed. Please try again.");
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
     }
   };
 
@@ -167,6 +204,7 @@ function EventDetailPage() {
         crumbs={[{ label: "Events", to: "/events" }, { label: event.title }]}
         actions={
           <div className="flex items-center gap-2">
+<<<<<<< HEAD
             {isOrganizerOrAdmin && (
               <Button
                 variant="default"
@@ -176,6 +214,8 @@ function EventDetailPage() {
                 <UserCheck className="size-4" /> Check-In Scanner
               </Button>
             )}
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
             <Button
               variant="outline"
               className="rounded-lg"
@@ -184,6 +224,7 @@ function EventDetailPage() {
               <Share2 className="size-4" aria-hidden="true" /> Share
             </Button>
             {isRegistered ? (
+<<<<<<< HEAD
               <div className="flex items-center gap-2">
                 <Button
                   variant="default"
@@ -219,13 +260,24 @@ function EventDetailPage() {
                 {event.currentRegistrations >= event.capacity
                   ? "Event Full"
                   : "Register Now (Free)"}
+=======
+              <Button variant="secondary" disabled className="rounded-lg gap-2 text-success">
+                <CheckCircle2 className="size-4" /> Registered
+              </Button>
+            ) : (
+              <Button className="rounded-lg gap-2" onClick={handleRegister}>
+                <Ticket className="size-4" aria-hidden="true" /> Register Now (Free)
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
               </Button>
             )}
           </div>
         }
       />
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
       {/* Banner Header */}
       <div
         className="relative h-40 overflow-hidden rounded-2xl sm:h-48"
@@ -389,6 +441,7 @@ function EventDetailPage() {
             {/* TAB: Registered Participants */}
             <TabsContent value="attendees" className="mt-4">
               <SectionCard
+<<<<<<< HEAD
                 title="Registered Participants & On-Site Attendance"
                 description={`Official registrations (${attendees.length} total · ${attendees.filter((r) => r.attendance === "attended").length} checked in)`}
                 bodyClassName="p-0"
@@ -404,6 +457,11 @@ function EventDetailPage() {
                     </Button>
                   )
                 }
+=======
+                title="Registered Participants"
+                description={`Official registrations (${attendees.length} total)`}
+                bodyClassName="p-0"
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
               >
                 {attendees.length === 0 ? (
                   <p className="px-5 py-10 text-center text-sm text-muted-foreground">
@@ -411,6 +469,7 @@ function EventDetailPage() {
                   </p>
                 ) : (
                   <ul className="divide-y divide-border">
+<<<<<<< HEAD
                     {attendees.map((r) => {
                       const isCheckedIn = r.attendance === "attended";
                       const isCancelled = r.status === "cancelled";
@@ -483,12 +542,35 @@ function EventDetailPage() {
                         </li>
                       );
                     })}
+=======
+                    {attendees.map((r) => (
+                      <li
+                        key={r.id}
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-3.5"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-foreground">
+                            {r.participant}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {r.email} · Ticket Code:{" "}
+                            <strong className="text-foreground">{r.ticketCode}</strong> · Registered{" "}
+                            {r.registeredAt}
+                          </p>
+                        </div>
+                        <StatusBadge status={r.status} />
+                      </li>
+                    ))}
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
                   </ul>
                 )}
               </SectionCard>
             </TabsContent>
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
             {/* TAB: Analytics */}
             <TabsContent value="analytics" className="mt-4">
               <SectionCard
@@ -618,6 +700,7 @@ function EventDetailPage() {
           </div>
         </div>
       </div>
+<<<<<<< HEAD
 
       <CheckinTerminalModal
         isOpen={isTerminalOpen}
@@ -639,3 +722,8 @@ function EventDetailPage() {
   );
 }
 
+=======
+    </AppShell>
+  );
+}
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad

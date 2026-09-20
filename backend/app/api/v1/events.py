@@ -3,17 +3,24 @@
 from __future__ import annotations
 
 import json
+<<<<<<< HEAD
 import math
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc, asc
 from typing import List, Optional, Union
+=======
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from typing import List, Optional
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 
 from app.core.dependencies import get_db, require_organizer, get_current_user
 from app.models.user import User
 from app.models.event import Event
 from app.models.weather import WeatherRecord
 from app.models.prediction import Prediction
+<<<<<<< HEAD
 from app.schemas.event import (
     EventResponse,
     EventCreate,
@@ -22,13 +29,19 @@ from app.schemas.event import (
     PlanningInsightSchema,
     PaginatedEventsResponse,
 )
+=======
+from app.schemas.event import EventResponse, EventCreate, EventUpdate, WeatherForecastSchema, PlanningInsightSchema
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 from app.services import event_service
 from app.services.insight_service import generate_planning_insights
 
 router = APIRouter(prefix="/events", tags=["Events"])
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 def map_db_event_to_response(db: Session, event: Event) -> EventResponse:
     # Fetch weather record
     weather_db = (
@@ -127,6 +140,7 @@ def map_db_event_to_response(db: Session, event: Event) -> EventResponse:
     )
 
 
+<<<<<<< HEAD
 @router.get("/categories", response_model=List[str])
 def get_event_categories(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Fetch distinct event categories for filter dropdowns."""
@@ -212,6 +226,11 @@ def get_events(
 
     # If pagination is not requested, return list of all matching items
     events_db = query.all()
+=======
+@router.get("", response_model=List[EventResponse])
+def get_events(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    events_db = db.query(Event).all()
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
     return [map_db_event_to_response(db, e) for e in events_db]
 
 
@@ -223,7 +242,10 @@ def get_event(id: str, db: Session = Depends(get_db), current_user: User = Depen
     return map_db_event_to_response(db, event)
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 @router.post("", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
 async def create_event(request: EventCreate, db: Session = Depends(get_db), current_user: User = Depends(require_organizer)):
     try:

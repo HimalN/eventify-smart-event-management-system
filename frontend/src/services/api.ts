@@ -10,17 +10,25 @@ import type {
   PlanningInsight,
   PredictionResult,
   Registration,
+<<<<<<< HEAD
   CheckInResponse,
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   WeatherForecast,
   NotificationItem,
   ActivityItem,
   User,
+<<<<<<< HEAD
   PaginatedEvents,
   EventQueryParams,
 } from "@/types";
 
 
 
+=======
+} from "@/types";
+
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 export const API_BASE_URL = import.meta.env["VITE_API_BASE_URL"] ?? "http://localhost:8000/api/v1";
 
 /** Get stored auth token from localStorage */
@@ -136,6 +144,7 @@ export const api = {
 
   // Events
   getEvents: (): Promise<EventItem[]> => http<EventItem[]>("/events"),
+<<<<<<< HEAD
 
   getPaginatedEvents: (params: EventQueryParams = {}): Promise<PaginatedEvents> => {
     const searchParams = new URLSearchParams();
@@ -154,6 +163,11 @@ export const api = {
   getEvent: (id: string): Promise<EventItem | null> =>
     http<EventItem>(`/events/${id}`).catch(() => null),
 
+=======
+  
+  getEvent: (id: string): Promise<EventItem | null> =>
+    http<EventItem>(`/events/${id}`).catch(() => null),
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
     
   createEvent: (data: Partial<EventItem>): Promise<EventItem> =>
     http<EventItem>("/events", {
@@ -193,6 +207,7 @@ export const api = {
       method: "DELETE",
     }).then(() => true).catch(() => false),
 
+<<<<<<< HEAD
   checkInParticipant: (ticketCode: string, eventId?: string): Promise<CheckInResponse> =>
     http<CheckInResponse>("/registrations/check-in", {
       method: "POST",
@@ -200,6 +215,8 @@ export const api = {
     }),
 
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   // ML Predictions & Models
   getModelEvaluations: (): Promise<ModelEvaluation[]> => http<ModelEvaluation[]>("/models/benchmark"),
   
@@ -216,6 +233,7 @@ export const api = {
   getNotifications: (): Promise<NotificationItem[]> => http<NotificationItem[]>("/notifications"),
   getActivities: (): Promise<ActivityItem[]> => http<ActivityItem[]>("/activities"),
   getReports: (): Promise<any[]> => http<any[]>("/reports"),
+<<<<<<< HEAD
   generateReport: (payload: { reportType: string; dateFrom?: string; dateTo?: string }): Promise<any> =>
     http<any>("/reports/generate", {
       method: "POST",
@@ -244,6 +262,9 @@ export const api = {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(blobUrl);
   },
+=======
+  getTasks: (): Promise<any[]> => http<any[]>("/tasks"),
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 
   // Weather
   getWeather: (): Promise<any> => http<any>("/weather"),
@@ -254,8 +275,11 @@ export const api = {
 
 export const queryKeys = {
   events: ["events"] as const,
+<<<<<<< HEAD
   paginatedEvents: (params: EventQueryParams) => ["events", "paginated", params] as const,
   eventCategories: ["events", "categories"] as const,
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   event: (id: string) => ["events", id] as const,
   users: ["users"] as const,
   registrations: ["registrations"] as const,
@@ -268,4 +292,7 @@ export const queryKeys = {
   weather: ["weather"] as const,
   analytics: ["analytics"] as const,
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad

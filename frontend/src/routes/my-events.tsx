@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -11,12 +12,18 @@ import {
   SlidersHorizontal,
   Calendar,
 } from "lucide-react";
+=======
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { CalendarPlus, Ticket, Loader2 } from "lucide-react";
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 import { AppShell } from "@/components/layouts/app-shell";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -31,6 +38,11 @@ import { PaginationControls } from "@/components/shared/pagination-controls";
 import { useAuth } from "@/contexts/auth-context";
 import { api, queryKeys } from "@/services/api";
 import type { Registration } from "@/types";
+=======
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/auth-context";
+import { api, queryKeys } from "@/services/api";
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 
 export const Route = createFileRoute("/my-events")({
   head: () => ({
@@ -54,6 +66,7 @@ export const Route = createFileRoute("/my-events")({
 
 function MyEventsPage() {
   const { user } = useAuth();
+<<<<<<< HEAD
   const [selectedTicket, setSelectedTicket] = useState<Registration | null>(null);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
@@ -74,6 +87,9 @@ function MyEventsPage() {
   const [pastPage, setPastPage] = useState(1);
   const [pastLimit, setPastLimit] = useState(6);
 
+=======
+  
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   const { data: events = [], isLoading: eventsLoading } = useQuery({
     queryKey: queryKeys.events,
     queryFn: api.getEvents,
@@ -85,6 +101,7 @@ function MyEventsPage() {
   });
 
   const isParticipant = user.role === "participant";
+<<<<<<< HEAD
 
   // Filter organized events
   const organizedEvents = useMemo(() => {
@@ -145,6 +162,9 @@ function MyEventsPage() {
     return pastEvents.slice(start, start + pastLimit);
   }, [pastEvents, pastPage, pastLimit]);
 
+=======
+  
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   if (eventsLoading || registrationsLoading) {
     return (
       <AppShell>
@@ -155,11 +175,21 @@ function MyEventsPage() {
     );
   }
 
+<<<<<<< HEAD
+=======
+  const mine = events.filter(e => isParticipant ? false : true); // In a real app, filter by organizer ID
+  const myRegistrations = allRegistrations.filter(r => r.email === user?.email);
+
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
   return (
     <AppShell>
       <PageHeader
         title="My Events"
+<<<<<<< HEAD
         description={isParticipant ? "Events you've registered for." : "Events you organize & tickets you hold."}
+=======
+        description={isParticipant ? "Events you've registered for." : "Events you organize."}
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
         crumbs={[{ label: "My Events" }]}
         actions={
           !isParticipant && (
@@ -174,6 +204,7 @@ function MyEventsPage() {
 
       <Tabs defaultValue={isParticipant ? "registered" : "organizing"}>
         <TabsList className="rounded-xl">
+<<<<<<< HEAD
           {!isParticipant && <TabsTrigger value="organizing">Organizing ({events.length})</TabsTrigger>}
           <TabsTrigger value="registered">Registered Passes ({userRegistrations.length})</TabsTrigger>
           <TabsTrigger value="past">Past Events ({pastEvents.length})</TabsTrigger>
@@ -422,6 +453,99 @@ function MyEventsPage() {
           </div>
 
           {paginatedPastEvents.length === 0 ? (
+=======
+          {!isParticipant && <TabsTrigger value="organizing">Organizing</TabsTrigger>}
+          <TabsTrigger value="registered">Registered</TabsTrigger>
+          <TabsTrigger value="past">Past</TabsTrigger>
+        </TabsList>
+
+        {!isParticipant && (
+          <TabsContent value="organizing" className="mt-4">
+            <SectionCard
+              title="Organizing"
+              description={`${mine.length} events`}
+              bodyClassName="p-0"
+            >
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                      <th scope="col" className="px-5 py-3 font-medium">
+                        Event
+                      </th>
+                      <th scope="col" className="px-5 py-3 font-medium">
+                        Date
+                      </th>
+                      <th scope="col" className="px-5 py-3 font-medium">
+                        Registered
+                      </th>
+                      <th scope="col" className="px-5 py-3 font-medium">
+                        Predicted
+                      </th>
+                      <th scope="col" className="px-5 py-3 font-medium">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {mine.map((e) => (
+                      <tr key={e.id} className="transition-colors hover:bg-muted/50">
+                        <td className="px-5 py-3">
+                          <Link
+                            to="/events/$eventId"
+                            params={{ eventId: e.id }}
+                            className="font-medium hover:text-primary"
+                          >
+                            {e.title}
+                          </Link>
+                        </td>
+                        <td className="px-5 py-3 text-muted-foreground">{e.date}</td>
+                        <td className="px-5 py-3 tabular-nums">
+                          {e.currentRegistrations}/{e.capacity}
+                        </td>
+                        <td className="px-5 py-3 tabular-nums">{e.predictedAttendance}</td>
+                        <td className="px-5 py-3">
+                          <StatusBadge status={e.status} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </SectionCard>
+          </TabsContent>
+        )}
+
+        <TabsContent value="registered" className="mt-4">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {myRegistrations
+              .filter((r) => r.status !== "cancelled")
+              .map((r) => (
+                <div key={r.id} className="surface-card p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="min-w-0 truncate text-sm font-semibold">{r.eventTitle}</p>
+                    <StatusBadge status={r.status} />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">Registered {r.registeredAt}</p>
+                  <div className="mt-4 flex items-center justify-between rounded-xl border border-dashed border-border px-3 py-2">
+                    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Ticket className="size-3.5" aria-hidden="true" /> Ticket
+                    </span>
+                    <span className="font-mono text-xs font-medium">{r.ticketCode}</span>
+                  </div>
+                  <Button asChild variant="outline" size="sm" className="mt-4 w-full rounded-lg">
+                    <Link to="/events/$eventId" params={{ eventId: r.eventId }}>
+                      View event
+                    </Link>
+                  </Button>
+                </div>
+              ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="past" className="mt-4">
+          {events.filter((e) => e.status === "completed").length === 0 ? (
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
             <EmptyState
               icon={Ticket}
               title="No past events"
@@ -429,6 +553,7 @@ function MyEventsPage() {
             />
           ) : (
             <SectionCard
+<<<<<<< HEAD
               title="Past Events"
               description={`Completed with attendance results (${pastEvents.length} total)`}
               bodyClassName="p-0"
@@ -488,3 +613,34 @@ function MyEventsPage() {
 }
 
 
+=======
+              title="Past events"
+              description="Completed with attendance results"
+              bodyClassName="p-0"
+            >
+              <ul className="divide-y divide-border">
+                {events
+                  .filter((e) => e.status === "completed")
+                  .map((e) => (
+                    <li
+                      key={e.id}
+                      className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-3.5"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{e.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {e.date} · predicted {e.predictedAttendance} · actual {e.actualAttendance}
+                        </p>
+                      </div>
+                      <StatusBadge status="completed" />
+                    </li>
+                  ))}
+              </ul>
+            </SectionCard>
+          )}
+        </TabsContent>
+      </Tabs>
+    </AppShell>
+  );
+}
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad

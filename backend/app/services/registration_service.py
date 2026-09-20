@@ -51,12 +51,17 @@ async def create_registration(db: Session, event_id: str, participant_id: str | 
         if existing:
             raise ValueError("A registration with this email already exists for this event")
 
+<<<<<<< HEAD
     # Generate guaranteed unique ticket code
     ticket = generate_ticket_code(event_id)
     for _ in range(10):
         if not db.query(Registration).filter(Registration.ticket_code == ticket).first():
             break
         ticket = generate_ticket_code(event_id)
+=======
+    # Generate ticket code
+    ticket = generate_ticket_code(event_id)
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 
     registration = Registration(
         event_id=event_id,
@@ -185,6 +190,7 @@ async def cancel_registration(db: Session, registration_id: str, actor_name: str
     db.add(act)
     db.commit()
     return True
+<<<<<<< HEAD
 
 
 async def check_in_participant(
@@ -263,3 +269,5 @@ async def check_in_participant(
         "timestamp": now_str,
     }
 
+=======
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad

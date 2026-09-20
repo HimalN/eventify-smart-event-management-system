@@ -9,8 +9,20 @@ import { PredictionWidget } from "@/components/shared/prediction-widget";
 import { AttendancePredictionChart } from "@/components/charts/charts";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+<<<<<<< HEAD
 import { api, queryKeys } from "@/services/api";
 
+=======
+import { Checkbox } from "@/components/ui/checkbox";
+import { api, queryKeys } from "@/services/api";
+
+const upcomingTasks = [
+  { id: "t1", title: "Confirm venue booking for AI Summit", due: "Tomorrow", priority: "high" },
+  { id: "t2", title: "Review catering menu options", due: "Next Week", priority: "medium" },
+  { id: "t3", title: "Send speaker invitations", due: "In 2 days", priority: "high" },
+];
+
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
 export function OrganizerDashboard() {
   const { data: events = [], isLoading: eventsLoading } = useQuery({
     queryKey: queryKeys.events,
@@ -147,6 +159,7 @@ export function OrganizerDashboard() {
           </ul>
         </SectionCard>
 
+<<<<<<< HEAD
         <SectionCard
           title="Recent Attendance Check-Ins"
           description="Live on-site gate check-ins (FR10–FR13)"
@@ -182,6 +195,21 @@ export function OrganizerDashboard() {
                 ))}
             </ul>
           )}
+=======
+        <SectionCard title="Upcoming Tasks" description="Your event checklist" bodyClassName="p-0">
+          <ul className="divide-y divide-border">
+            {upcomingTasks.map((t) => (
+              <li key={t.id} className="flex items-start gap-3 px-5 py-3.5">
+                <Checkbox id={t.id} className="mt-0.5" />
+                <label htmlFor={t.id} className="min-w-0 flex-1 cursor-pointer">
+                  <span className="block truncate text-sm font-medium">{t.title}</span>
+                  <span className="text-xs text-muted-foreground">Due {t.due}</span>
+                </label>
+                <StatusBadge status={t.priority} />
+              </li>
+            ))}
+          </ul>
+>>>>>>> 1e84df882758a8315a2b307f308c3c92965815ad
         </SectionCard>
       </div>
 
