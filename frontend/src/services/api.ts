@@ -10,11 +10,16 @@ import type {
   PlanningInsight,
   PredictionResult,
   Registration,
+  CheckInResponse,
   WeatherForecast,
   NotificationItem,
   ActivityItem,
   User,
+  PaginatedEvents,
+  EventQueryParams,
 } from "@/types";
+
+
 
 export const API_BASE_URL = import.meta.env["VITE_API_BASE_URL"] ?? "http://localhost:8000/api/v1";
 
@@ -131,9 +136,24 @@ export const api = {
 
   // Events
   getEvents: (): Promise<EventItem[]> => http<EventItem[]>("/events"),
+
+  getPaginatedEvents: (params: EventQueryParams = {}): Promise<PaginatedEvents> => {
+    const searchParams = new URLSearchParams();
+    if (params.page !== undefined) searchParams.set("page", String(params.page));
+    if (params.limit !== undefined) searchParams.set("limit", String(params.limit));
+    if (params.search && params.search.trim()) searchParams.set("search", params.search.trim());
+    if (params.category && params.category !== "all") searchParams.set("category", params.category);
+    if (params.status && params.status !== "all") searchParams.set("status", params.status);
+    if (params.sortBy) searchParams.set("sort_by", params.sortBy);
+    if (params.order) searchParams.set("order", params.order);
+    return http<PaginatedEvents>(`/events?${searchParams.toString()}`);
+  },
+
+  getEventCategories: (): Promise<string[]> => http<string[]>("/events/categories"),
   
   getEvent: (id: string): Promise<EventItem | null> =>
     http<EventItem>(`/events/${id}`).catch(() => null),
+
     
   createEvent: (data: Partial<EventItem>): Promise<EventItem> =>
     http<EventItem>("/events", {
@@ -173,6 +193,13 @@ export const api = {
       method: "DELETE",
     }).then(() => true).catch(() => false),
 
+  checkInParticipant: (ticketCode: string, eventId?: string): Promise<CheckInResponse> =>
+    http<CheckInResponse>("/registrations/check-in", {
+      method: "POST",
+      body: JSON.stringify({ ticketCode, eventId }),
+    }),
+
+
   // ML Predictions & Models
   getModelEvaluations: (): Promise<ModelEvaluation[]> => http<ModelEvaluation[]>("/models/benchmark"),
   
@@ -189,7 +216,34 @@ export const api = {
   getNotifications: (): Promise<NotificationItem[]> => http<NotificationItem[]>("/notifications"),
   getActivities: (): Promise<ActivityItem[]> => http<ActivityItem[]>("/activities"),
   getReports: (): Promise<any[]> => http<any[]>("/reports"),
-  getTasks: (): Promise<any[]> => http<any[]>("/tasks"),
+  generateReport: (payload: { reportType: string; dateFrom?: string; dateTo?: string }): Promise<any> =>
+    http<any>("/reports/generate", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  deleteReport: (id: string): Promise<boolean> =>
+    http<any>(`/reports/${id}`, {
+      method: "DELETE",
+    }).then(() => true).catch(() => false),
+  exportReportCsv: async (reportType: string): Promise<void> => {
+    const token = getStoredToken();
+    const url = `${API_BASE}/reports/export?report_type=${encodeURIComponent(reportType)}`;
+    const res = await fetch(url, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!res.ok) throw new Error("Failed to export report CSV");
+    const blob = await res.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = `${reportType.toLowerCase().replace(/\s+/g, "_")}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(blobUrl);
+  },
 
   // Weather
   getWeather: (): Promise<any> => http<any>("/weather"),
@@ -200,6 +254,8 @@ export const api = {
 
 export const queryKeys = {
   events: ["events"] as const,
+  paginatedEvents: (params: EventQueryParams) => ["events", "paginated", params] as const,
+  eventCategories: ["events", "categories"] as const,
   event: (id: string) => ["events", id] as const,
   users: ["users"] as const,
   registrations: ["registrations"] as const,
@@ -212,3 +268,4 @@ export const queryKeys = {
   weather: ["weather"] as const,
   analytics: ["analytics"] as const,
 };
+

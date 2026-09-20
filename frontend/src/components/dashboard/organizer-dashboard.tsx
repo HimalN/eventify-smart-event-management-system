@@ -9,14 +9,7 @@ import { PredictionWidget } from "@/components/shared/prediction-widget";
 import { AttendancePredictionChart } from "@/components/charts/charts";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Checkbox } from "@/components/ui/checkbox";
 import { api, queryKeys } from "@/services/api";
-
-const upcomingTasks = [
-  { id: "t1", title: "Confirm venue booking for AI Summit", due: "Tomorrow", priority: "high" },
-  { id: "t2", title: "Review catering menu options", due: "Next Week", priority: "medium" },
-  { id: "t3", title: "Send speaker invitations", due: "In 2 days", priority: "high" },
-];
 
 export function OrganizerDashboard() {
   const { data: events = [], isLoading: eventsLoading } = useQuery({
@@ -154,19 +147,41 @@ export function OrganizerDashboard() {
           </ul>
         </SectionCard>
 
-        <SectionCard title="Upcoming Tasks" description="Your event checklist" bodyClassName="p-0">
-          <ul className="divide-y divide-border">
-            {upcomingTasks.map((t) => (
-              <li key={t.id} className="flex items-start gap-3 px-5 py-3.5">
-                <Checkbox id={t.id} className="mt-0.5" />
-                <label htmlFor={t.id} className="min-w-0 flex-1 cursor-pointer">
-                  <span className="block truncate text-sm font-medium">{t.title}</span>
-                  <span className="text-xs text-muted-foreground">Due {t.due}</span>
-                </label>
-                <StatusBadge status={t.priority} />
-              </li>
-            ))}
-          </ul>
+        <SectionCard
+          title="Recent Attendance Check-Ins"
+          description="Live on-site gate check-ins (FR10–FR13)"
+          bodyClassName="p-0"
+          action={
+            <Button asChild variant="ghost" size="sm" className="text-xs">
+              <Link to="/reports">View Reports</Link>
+            </Button>
+          }
+        >
+          {registrations.filter((r) => r.attendance === "attended").length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-6 text-center text-xs text-muted-foreground">
+              <p className="font-medium">No check-ins yet today</p>
+              <p className="text-[11px] mt-0.5">Use the gate check-in terminal on event pages to scan attendees.</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-border">
+              {registrations
+                .filter((r) => r.attendance === "attended")
+                .slice(0, 5)
+                .map((r) => (
+                  <li key={r.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-foreground">{r.participant}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {r.eventTitle} · <span className="font-mono text-[11px]">{r.ticketCode}</span>
+                      </p>
+                    </div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-semibold text-success shrink-0">
+                      Attended
+                    </span>
+                  </li>
+                ))}
+            </ul>
+          )}
         </SectionCard>
       </div>
 

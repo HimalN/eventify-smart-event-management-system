@@ -68,8 +68,21 @@ def generate_report(request: ReportGenerateRequest, db: Session = Depends(get_db
 def export_csv(report_type: str = "Event Summary", db: Session = Depends(get_db), current_user: User = Depends(require_organizer)):
     """Export report as downloadable CSV spreadsheet."""
     csv_data = report_service.export_report_csv(db, report_type)
+    filename = f"{report_type.lower().replace(' ', '_')}.csv"
     return StreamingResponse(
         iter([csv_data]),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename={report_type.lower().replace(' ', '_')}.csv"},
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition",
+        },
     )
+
+
+@router.delete("/{id}")
+def delete_report(id: str, db: Session = Depends(get_db), current_user: User = Depends(require_organizer)):
+    """Delete a generated report."""
+    success = report_service.delete_report(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return {"success": True, "message": "Report deleted successfully"}

@@ -123,7 +123,28 @@ export interface EventItem {
   planningInsights: PlanningInsight[];
 }
 
+export interface PaginatedEvents {
+  items: EventItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface EventQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  status?: string;
+  sortBy?: string;
+  order?: "asc" | "desc";
+}
+
 export interface Registration {
+
   id: string;
   eventId: string;
   eventTitle: string;
@@ -133,7 +154,17 @@ export interface Registration {
   status: "confirmed" | "waitlisted" | "cancelled";
   attendance: "attended" | "absent" | "pending";
   ticketCode: string;
+  checkedInAt?: string;
 }
+
+export interface CheckInResponse {
+  success: boolean;
+  message: string;
+  registration?: Registration;
+  alreadyCheckedIn: boolean;
+  timestamp: string;
+}
+
 
 export interface NotificationItem {
   id: string;

@@ -51,8 +51,12 @@ async def create_registration(db: Session, event_id: str, participant_id: str | 
         if existing:
             raise ValueError("A registration with this email already exists for this event")
 
-    # Generate ticket code
+    # Generate guaranteed unique ticket code
     ticket = generate_ticket_code(event_id)
+    for _ in range(10):
+        if not db.query(Registration).filter(Registration.ticket_code == ticket).first():
+            break
+        ticket = generate_ticket_code(event_id)
 
     registration = Registration(
         event_id=event_id,
@@ -181,3 +185,81 @@ async def cancel_registration(db: Session, registration_id: str, actor_name: str
     db.add(act)
     db.commit()
     return True
+
+
+async def check_in_participant(
+    db: Session,
+    ticket_code: str,
+    event_id: str | None = None,
+    actor_name: str = "Staff",
+) -> dict:
+    normalized_code = ticket_code.strip().upper()
+    reg = db.query(Registration).filter(Registration.ticket_code == normalized_code).first()
+    if not reg:
+        raise ValueError(f"Invalid ticket code '{normalized_code}'. No registration found.")
+
+    if reg.confirmation_status == "cancelled":
+        raise ValueError(f"Ticket {normalized_code} is cancelled and cannot be used for check-in.")
+
+    event = db.query(Event).filter(Event.id == reg.event_id).first()
+    if not event:
+        raise ValueError("Associated event not found.")
+
+    if event_id and reg.event_id != event_id:
+        raise ValueError(f"Ticket {normalized_code} is valid for '{event.title}', not the selected event.")
+
+    now = datetime.now(timezone.utc)
+    now_str = now.strftime("%Y-%m-%d %H:%M:%S")
+
+    # If already checked in, inform the caller without duplicating count
+    if reg.attendance_status == "attended":
+        prior_time = reg.checked_in_at.strftime("%Y-%m-%d %H:%M:%S") if reg.checked_in_at else "earlier"
+        return {
+            "success": True,
+            "message": f"{reg.participant_name} was already checked in (at {prior_time}).",
+            "registration": reg,
+            "event": event,
+            "already_checked_in": True,
+            "timestamp": now_str,
+        }
+
+    # Mark as attended and record check-in time
+    reg.attendance_status = "attended"
+    reg.checked_in_at = now
+    db.flush()
+
+    # Recalculate actual attendance for the event
+    attended_count = (
+        db.query(Registration)
+        .filter(
+            Registration.event_id == reg.event_id,
+            Registration.attendance_status == "attended",
+        )
+        .count()
+    )
+    event.actual_attendance = attended_count
+
+    # If event was upcoming/draft, we can also ensure status reflects ongoing if during event day
+    if event.status == "upcoming":
+        event.status = "ongoing"
+
+    act = Activity(
+        actor=actor_name,
+        action="checked in",
+        target=f"{reg.participant_name} ({reg.ticket_code}) for {event.title}",
+        resource_id=reg.id,
+    )
+    db.add(act)
+    db.commit()
+    db.refresh(reg)
+    db.refresh(event)
+
+    return {
+        "success": True,
+        "message": f"Successfully checked in {reg.participant_name}!",
+        "registration": reg,
+        "event": event,
+        "already_checked_in": False,
+        "timestamp": now_str,
+    }
+

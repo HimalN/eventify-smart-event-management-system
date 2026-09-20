@@ -3,20 +3,30 @@
 from __future__ import annotations
 
 import json
-from fastapi import APIRouter, Depends, HTTPException, status
+import math
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from sqlalchemy import or_, desc, asc
+from typing import List, Optional, Union
 
 from app.core.dependencies import get_db, require_organizer, get_current_user
 from app.models.user import User
 from app.models.event import Event
 from app.models.weather import WeatherRecord
 from app.models.prediction import Prediction
-from app.schemas.event import EventResponse, EventCreate, EventUpdate, WeatherForecastSchema, PlanningInsightSchema
+from app.schemas.event import (
+    EventResponse,
+    EventCreate,
+    EventUpdate,
+    WeatherForecastSchema,
+    PlanningInsightSchema,
+    PaginatedEventsResponse,
+)
 from app.services import event_service
 from app.services.insight_service import generate_planning_insights
 
 router = APIRouter(prefix="/events", tags=["Events"])
+
 
 
 def map_db_event_to_response(db: Session, event: Event) -> EventResponse:
@@ -117,9 +127,91 @@ def map_db_event_to_response(db: Session, event: Event) -> EventResponse:
     )
 
 
-@router.get("", response_model=List[EventResponse])
-def get_events(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    events_db = db.query(Event).all()
+@router.get("/categories", response_model=List[str])
+def get_event_categories(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Fetch distinct event categories for filter dropdowns."""
+    results = db.query(Event.category).distinct().all()
+    categories = [r[0] for r in results if r[0]]
+    if not categories:
+        categories = ["Workshop", "Conference", "Hackathon", "Seminar", "Sports", "Cultural", "Webinar"]
+    return sorted(list(set(categories)))
+
+
+@router.get("", response_model=Union[PaginatedEventsResponse, List[EventResponse]])
+def get_events(
+    page: Optional[int] = Query(default=None, ge=1),
+    limit: Optional[int] = Query(default=None, ge=1, le=100),
+    search: Optional[str] = Query(default=None),
+    category: Optional[str] = Query(default=None),
+    status: Optional[str] = Query(default=None),
+    sort_by: Optional[str] = Query(default="date"),
+    order: Optional[str] = Query(default="asc"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(Event)
+
+    # Search filter (title, location, description, category)
+    if search and search.strip():
+        term = f"%{search.strip().lower()}%"
+        query = query.filter(
+            or_(
+                Event.title.ilike(term),
+                Event.location.ilike(term),
+                Event.description.ilike(term),
+                Event.category.ilike(term),
+            )
+        )
+
+    # Category filter
+    if category and category.strip() and category.lower() != "all":
+        query = query.filter(Event.category.ilike(category.strip()))
+
+    # Status filter
+    if status and status.strip() and status.lower() != "all":
+        # Handle status mappings
+        if status.lower() == "upcoming":
+            query = query.filter(Event.status.in_(["upcoming", "scheduled", "registration_open", "registration_closed"]))
+        else:
+            query = query.filter(Event.status.ilike(status.strip()))
+
+    # Sorting
+    sort_col = Event.event_date
+    if sort_by == "title":
+        sort_col = Event.title
+    elif sort_by == "created_at":
+        sort_col = Event.created_at
+    elif sort_by == "capacity":
+        sort_col = Event.capacity
+    elif sort_by == "predicted_attendance":
+        sort_col = Event.predicted_attendance
+
+    if order == "desc":
+        query = query.order_by(desc(sort_col))
+    else:
+        query = query.order_by(asc(sort_col))
+
+    # If page is specified, return paginated response
+    if page is not None:
+        page_size = limit if limit is not None else 9
+        total_count = query.count()
+        total_pages = max(1, math.ceil(total_count / page_size)) if total_count > 0 else 1
+        
+        events_db = query.offset((page - 1) * page_size).limit(page_size).all()
+        items = [map_db_event_to_response(db, e) for e in events_db]
+
+        return PaginatedEventsResponse(
+            items=items,
+            total=total_count,
+            page=page,
+            limit=page_size,
+            total_pages=total_pages,
+            has_next=page < total_pages,
+            has_prev=page > 1,
+        )
+
+    # If pagination is not requested, return list of all matching items
+    events_db = query.all()
     return [map_db_event_to_response(db, e) for e in events_db]
 
 
@@ -129,6 +221,7 @@ def get_event(id: str, db: Session = Depends(get_db), current_user: User = Depen
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return map_db_event_to_response(db, event)
+
 
 
 @router.post("", response_model=EventResponse, status_code=status.HTTP_201_CREATED)

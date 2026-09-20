@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   CalendarDays,
@@ -18,6 +18,9 @@ import {
   Utensils,
   Wind,
   Loader2,
+  UserCheck,
+  QrCode,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layouts/app-shell";
@@ -29,12 +32,16 @@ import { weatherIcon } from "@/components/shared/weather-widget";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckinTerminalModal } from "@/components/events/checkin-terminal-modal";
+import { QrTicketModal } from "@/components/shared/qr-ticket-modal";
 import { useAuth } from "@/contexts/auth-context";
 import { api, queryKeys } from "@/services/api";
+import type { Registration } from "@/types";
 
 export const Route = createFileRoute("/events/$eventId")({
   component: EventDetailPage,
 });
+
 
 function EventDetailPage() {
   const { eventId } = Route.useParams();
@@ -45,13 +52,56 @@ function EventDetailPage() {
     queryFn: () => api.getEvent(eventId),
   });
 
+  const queryClient = useQueryClient();
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<Registration | null>(null);
+  const [checkingInCode, setCheckingInCode] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+
   const { data: allRegistrations = [] } = useQuery({
     queryKey: queryKeys.registrations,
     queryFn: api.getRegistrations,
   });
   
   const attendees = allRegistrations.filter((r) => r.eventId === eventId);
-  const [isRegistered, setIsRegistered] = useState(false);
+  
+  // Identify if current logged-in user is already registered for this event
+  const myRegistration = attendees.find((r) => {
+    if (!user) return false;
+    return (
+      (r.participant && user.name && r.participant.toLowerCase() === user.name.toLowerCase()) ||
+      (r.email && user.email && r.email.toLowerCase() === user.email.toLowerCase())
+    );
+  });
+  const isRegistered = Boolean(myRegistration || selectedTicket);
+  const activeTicket = myRegistration || selectedTicket;
+
+  const isOrganizerOrAdmin = user?.role === "organizer" || user?.role === "admin";
+
+  const handleQuickCheckIn = async (ticketCode: string) => {
+    setCheckingInCode(ticketCode);
+    try {
+      const res = await api.checkInParticipant(ticketCode, eventId);
+      if (res.alreadyCheckedIn) {
+        toast.warning(res.message);
+      } else {
+        toast.success("Check-In Confirmed!", {
+          description: `${res.registration?.participant || ticketCode} is now marked as attended.`,
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.event(eventId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.events });
+      queryClient.invalidateQueries({ queryKey: queryKeys.registrations });
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities });
+    } catch (err: any) {
+      toast.error("Check-In Failed", {
+        description: err.message || "Could not check in attendee.",
+      });
+    } finally {
+      setCheckingInCode(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -84,18 +134,28 @@ function EventDetailPage() {
   const WeatherConditionIcon = weatherIcon[event.weather?.condition || "Sunny"] || weatherIcon["Sunny"];
 
   const handleRegister = async () => {
+    if (!user?.name || !user?.email) {
+      toast.error("Please login to register for events.");
+      return;
+    }
+    setIsRegistering(true);
     try {
-      if (user?.name && user?.email) {
-        await api.registerForEvent(event.id, user.name, user.email);
-        setIsRegistered(true);
-        toast.success("Registration Confirmed!", {
-          description: `You are registered for ${event.title}.`,
-        });
-      } else {
-        toast.error("Please login to register.");
-      }
-    } catch {
-      toast.error("Registration failed. Please try again.");
+      const reg = await api.registerForEvent(event.id, user.name, user.email);
+      setSelectedTicket(reg);
+      setIsQrModalOpen(true);
+      toast.success("Registration Confirmed!", {
+        description: `Your unique ticket code is ${reg.ticketCode}. Here is your official QR Pass!`,
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.event(eventId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.events });
+      queryClient.invalidateQueries({ queryKey: queryKeys.registrations });
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities });
+    } catch (err: any) {
+      toast.error("Registration failed", {
+        description: err.message || "Please check your network and try again.",
+      });
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -107,6 +167,15 @@ function EventDetailPage() {
         crumbs={[{ label: "Events", to: "/events" }, { label: event.title }]}
         actions={
           <div className="flex items-center gap-2">
+            {isOrganizerOrAdmin && (
+              <Button
+                variant="default"
+                className="rounded-lg gap-2 bg-primary text-primary-foreground font-semibold shadow-sm"
+                onClick={() => setIsTerminalOpen(true)}
+              >
+                <UserCheck className="size-4" /> Check-In Scanner
+              </Button>
+            )}
             <Button
               variant="outline"
               className="rounded-lg"
@@ -115,17 +184,47 @@ function EventDetailPage() {
               <Share2 className="size-4" aria-hidden="true" /> Share
             </Button>
             {isRegistered ? (
-              <Button variant="secondary" disabled className="rounded-lg gap-2 text-success">
-                <CheckCircle2 className="size-4" /> Registered
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="default"
+                  className="rounded-lg gap-2 bg-primary text-primary-foreground font-semibold shadow-sm animate-pulse"
+                  onClick={() => {
+                    setSelectedTicket(activeTicket || null);
+                    setIsQrModalOpen(true);
+                  }}
+                >
+                  <QrCode className="size-4" /> View My QR Pass
+                </Button>
+                {activeTicket?.attendance === "attended" ? (
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-success/15 px-3 py-1.5 text-xs font-semibold text-success">
+                    <CheckCircle2 className="size-3.5" /> Checked In
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary">
+                    <Ticket className="size-3.5" /> Registered
+                  </span>
+                )}
+              </div>
             ) : (
-              <Button className="rounded-lg gap-2" onClick={handleRegister}>
-                <Ticket className="size-4" aria-hidden="true" /> Register Now (Free)
+              <Button
+                className="rounded-lg gap-2"
+                onClick={handleRegister}
+                disabled={isRegistering || event.currentRegistrations >= event.capacity}
+              >
+                {isRegistering ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Ticket className="size-4" aria-hidden="true" />
+                )}
+                {event.currentRegistrations >= event.capacity
+                  ? "Event Full"
+                  : "Register Now (Free)"}
               </Button>
             )}
           </div>
         }
       />
+
 
       {/* Banner Header */}
       <div
@@ -290,9 +389,21 @@ function EventDetailPage() {
             {/* TAB: Registered Participants */}
             <TabsContent value="attendees" className="mt-4">
               <SectionCard
-                title="Registered Participants"
-                description={`Official registrations (${attendees.length} total)`}
+                title="Registered Participants & On-Site Attendance"
+                description={`Official registrations (${attendees.length} total · ${attendees.filter((r) => r.attendance === "attended").length} checked in)`}
                 bodyClassName="p-0"
+                actions={
+                  isOrganizerOrAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-lg gap-1.5 text-xs font-semibold"
+                      onClick={() => setIsTerminalOpen(true)}
+                    >
+                      <UserCheck className="size-3.5" /> Launch Check-In Terminal
+                    </Button>
+                  )
+                }
               >
                 {attendees.length === 0 ? (
                   <p className="px-5 py-10 text-center text-sm text-muted-foreground">
@@ -300,28 +411,83 @@ function EventDetailPage() {
                   </p>
                 ) : (
                   <ul className="divide-y divide-border">
-                    {attendees.map((r) => (
-                      <li
-                        key={r.id}
-                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-3.5"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-foreground">
-                            {r.participant}
-                          </p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            {r.email} · Ticket Code:{" "}
-                            <strong className="text-foreground">{r.ticketCode}</strong> · Registered{" "}
-                            {r.registeredAt}
-                          </p>
-                        </div>
-                        <StatusBadge status={r.status} />
-                      </li>
-                    ))}
+                    {attendees.map((r) => {
+                      const isCheckedIn = r.attendance === "attended";
+                      const isCancelled = r.status === "cancelled";
+                      const isCheckingIn = checkingInCode === r.ticketCode;
+
+                      return (
+                        <li
+                          key={r.id}
+                          className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 hover:bg-muted/30 transition-colors"
+                        >
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-sm font-semibold text-foreground">
+                                {r.participant}
+                              </p>
+                              {isCheckedIn && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success">
+                                  <Check className="size-3" /> Attended
+                                </span>
+                              )}
+                            </div>
+                            <p className="truncate text-xs text-muted-foreground mt-0.5">
+                              {r.email} · Ticket Code:{" "}
+                              <strong className="font-mono text-foreground font-semibold">{r.ticketCode}</strong> · Registered{" "}
+                              {r.registeredAt}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 rounded-lg gap-1.5 px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted"
+                              onClick={() => {
+                                setSelectedTicket(r);
+                                setIsQrModalOpen(true);
+                              }}
+                              title="View Attendee QR Pass"
+                            >
+                              <QrCode className="size-3.5 text-primary" /> View Pass
+                            </Button>
+
+                            {isCancelled ? (
+                              <StatusBadge status="cancelled" />
+                            ) : isCheckedIn ? (
+                              <span className="text-xs font-medium text-success inline-flex items-center gap-1">
+                                <CheckCircle2 className="size-3.5" /> Checked In
+                              </span>
+                            ) : isOrganizerOrAdmin ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="rounded-lg gap-1.5 text-xs font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                                disabled={isCheckingIn}
+                                onClick={() => handleQuickCheckIn(r.ticketCode)}
+                              >
+                                {isCheckingIn ? (
+                                  <Loader2 className="size-3 animate-spin" />
+                                ) : (
+                                  <UserCheck className="size-3.5" />
+                                )}
+                                Check In
+                              </Button>
+                            ) : (
+                              <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                                Pending Check-In
+                              </span>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </SectionCard>
             </TabsContent>
+
 
             {/* TAB: Analytics */}
             <TabsContent value="analytics" className="mt-4">
@@ -452,6 +618,24 @@ function EventDetailPage() {
           </div>
         </div>
       </div>
+
+      <CheckinTerminalModal
+        isOpen={isTerminalOpen}
+        onClose={() => setIsTerminalOpen(false)}
+        event={event}
+        registrations={allRegistrations}
+      />
+
+      <QrTicketModal
+        isOpen={isQrModalOpen}
+        onClose={() => {
+          setIsQrModalOpen(false);
+          setSelectedTicket(null);
+        }}
+        registration={selectedTicket || myRegistration || null}
+        event={event}
+      />
     </AppShell>
   );
 }
+

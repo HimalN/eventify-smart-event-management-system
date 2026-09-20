@@ -100,7 +100,6 @@ const groups: { label: string; items: NavItem[] }[] = [
         icon: UserCog,
         roles: ["admin", "organizer", "participant"],
       },
-      { title: "Settings", url: "/settings", icon: Settings, roles: ["admin", "organizer"] },
     ],
   },
 ];
